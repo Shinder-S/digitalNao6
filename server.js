@@ -34,10 +34,10 @@ db.mongoose
     process.exit();
 });
 
-require('./app/routes')(app);
+require('./app/routes/restaurants.routes.js')(app);
 
 //set port
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8082;
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`);
 });
