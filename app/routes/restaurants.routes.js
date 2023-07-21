@@ -3,16 +3,16 @@ module.exports = app => {
   
     var router = require("express").Router();
   
-    // Create a new Tutorial
+    // Create a new Restaurant
     router.post("/", restaurants.create);
   
-    // Retrieve all Tutorials
+    // Retrieve all Restaurants
     router.get("/", restaurants.findAll);
   
-    // Retrieve all published Tutorials
-    //router.get("/published", restaurants.findAllChecked);
+    // Retrieve all checked Restaurants
+    router.get("/checked", restaurants.findAllChecked);
   
-    // Retrieve a single Tutorial with id
+    // Retrieve a single Restaurant with id
     router.get("/:id", restaurants.findOne);
   
     // Update a Tutorial with id

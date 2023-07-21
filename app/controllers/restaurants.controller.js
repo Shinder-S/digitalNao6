@@ -4,21 +4,16 @@ const Restaurant = db.restaurants;
 // Create and Save a new Restaurant
 exports.create = (req, res) => {
   // Validate request
-  if (!req.body.title) {
+  if (!req.body.name) {
     res.status(400).send({ message: "Content can not be empty!" });
     return;
   }
 
-  // Create a Restaurant
-  const tutorial = new Restaurant({
-    title: req.body.title,
-    description: req.body.description,
-    published: req.body.published ? req.body.published : false
-  });
+  const restaurant = new Restaurant(req.body);
 
   // Save Restaurant in the database
-  tutorial
-    .save(tutorial)
+  restaurant
+    .save(restaurant)
     .then(data => {
       res.send(data);
     })
@@ -129,7 +124,7 @@ exports.deleteAll = (req, res) => {
 };
 
 // Find all published Restaurants
-exports.findAllchecked = (req, res) => {
+exports.findAllChecked = (req, res) => {
   Restaurant.find({ published: true })
     .then(data => {
       res.send(data);
