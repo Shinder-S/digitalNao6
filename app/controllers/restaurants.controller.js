@@ -123,9 +123,26 @@ exports.deleteAll = (req, res) => {
     });
 };
 
-// Find all published Restaurants
+// Find all checked Restaurants
 exports.findAllChecked = (req, res) => {
-  Restaurant.find({ published: true })
+  Restaurant.find({ checked: true })
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving restaurants."
+      });
+    });
+};
+
+// Find a Restaurants by name
+exports.findByName = (req, res) => {
+  const name = req.query.name;
+  let condition = { "name": { $regex: '.*' + name + '.*' } };
+
+  Restaurant.find(condition)
     .then(data => {
       res.send(data);
     })

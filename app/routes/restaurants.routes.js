@@ -11,6 +11,9 @@ module.exports = app => {
   
     // Retrieve all checked Restaurants
     router.get("/checked", restaurants.findAllChecked);
+
+    // Find by name Restaurants
+    router.get("/name", restaurants.findByName);
   
     // Retrieve a single Restaurant with id
     router.get("/:id", restaurants.findOne);
