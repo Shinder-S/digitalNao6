@@ -59,6 +59,84 @@ exports.findOne = (req, res) => {
     });
 };
 
+// Find Restaurant by name
+exports.findByName = (req, res) => {
+  
+  const name = req.query.name;
+
+  var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
+
+  Restaurant.find(condition_name)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving restaurants."
+      });
+    });
+};
+
+// Find Restaurant by name
+exports.findByName = (req, res) => {
+  
+  const name = req.query.name;
+
+  var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
+
+  Restaurant.find(condition_name)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving restaurants."
+      });
+    });
+};
+
+// Find Restaurant by cuisine
+exports.findByCuisine = (req, res) => {
+
+  const cuisine = req.query.cuisine;
+
+  var condition_cuisine = cuisine ? { cuisine: { $regex: new RegExp(cuisine), $options: "i" } } : {};
+
+  Restaurant.find(condition_cuisine)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving restaurants."
+      });
+    });
+};
+
+// Find Restaurant by name & cuisine
+exports.findByNameAndCuisine = (req, res) => {
+  
+  const name = req.query.name;
+  const cuisine = req.query.cuisine;
+
+  var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
+  var condition_cuisine = cuisine ? { cuisine: { $regex: new RegExp(cuisine), $options: "i" } } : {};
+
+  Restaurant.find({$or:[condition_name,condition_cuisine]})
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving restaurants."
+      });
+    });
+};
+
 // Update a Restaurant by the id in the request
 exports.update = (req, res) => {
   if (!req.body) {

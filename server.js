@@ -15,12 +15,8 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-//simple route
-app.get("/", (req, res) => {
-    res.json({"message": "Welcome to Tattler API!"});
-});
 
-const db = require("./app/models");
+const db = require("./app/server/models");
 db.mongoose
 .connect(db.url, {
     useNewUrlParser: true,
@@ -34,7 +30,12 @@ db.mongoose
     process.exit();
 });
 
-require('./app/routes/restaurants.routes.js')(app);
+//simple route
+app.get("/", (req, res) => {
+    res.json({"message": "Welcome to Tattler API!"});
+});
+
+require('./app/server/routes/restaurants.routes.js')(app);
 
 //set port
 const PORT = process.env.PORT || 8082;
