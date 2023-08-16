@@ -78,25 +78,6 @@ exports.findByName = (req, res) => {
     });
 };
 
-// Find Restaurant by name
-exports.findByName = (req, res) => {
-  
-  const name = req.query.name;
-
-  var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
-
-  Restaurant.find(condition_name)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
-      });
-    });
-};
-
 // Find Restaurant by cuisine
 exports.findByCuisine = (req, res) => {
 
@@ -204,23 +185,6 @@ exports.deleteAll = (req, res) => {
 // Find all checked Restaurants
 exports.findAllChecked = (req, res) => {
   Restaurant.find({ checked: true })
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
-      });
-    });
-};
-
-// Find a Restaurants by name
-exports.findByName = (req, res) => {
-  const name = req.query.name;
-  let condition = { "name": { $regex: '.*' + name + '.*' } };
-
-  Restaurant.find(condition)
     .then(data => {
       res.send(data);
     })
