@@ -123,6 +123,38 @@ exports.update = async (req, res) => {
   }
 };
 
+// Find restaurants near a specific location
+exports.findNearbyRestaurants = async (req, res) => {
+  try {
+    const { latitude, longitude, maxDistance } = req.query;
+
+    if (!latitude || !longitude) {
+      return res.status(400).send({ message: "Latitude and longitude are required!" });
+    }
+
+    // Parse coordinates and max distance from the request
+    const lat = parseFloat(latitude);
+    const lon = parseFloat(longitude);
+    const distance = parseInt(maxDistance) || 5; // Default to 5 km if maxDistance is not provided
+
+    // Perform the geospatial query to find nearby restaurants
+    const data = await Restaurant.aggregate([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [lon, lat] },
+          distanceField: 'distance',
+          maxDistance: distance * 1000, // Convert distance to meters
+          spherical: true,
+        },
+      },
+    ]);
+
+    res.send(data);
+  } catch (err) {
+    handleError(res, err);
+  }
+};
+
 // Delete a Restaurant with the specified id in the request
 exports.delete = async (req, res) => {
   try {
