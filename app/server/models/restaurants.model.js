@@ -20,6 +20,8 @@ module.exports = mongoose => {
       comment: { type: String }
     }]
   });
+  
+  schema.index({ 'address.coord': '2dsphere' });
 
   schema.method("toJSON", function() {
     const { __v, _id,...object } = this.toObject();

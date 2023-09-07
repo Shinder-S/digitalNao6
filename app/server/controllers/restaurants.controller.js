@@ -61,7 +61,7 @@ exports.findOne = (req, res) => {
 
 // Find Restaurant by name
 exports.findByName = (req, res) => {
-  
+
   const name = req.query.name;
 
   var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
@@ -78,24 +78,6 @@ exports.findByName = (req, res) => {
     });
 };
 
-// Find Restaurant by name
-exports.findByName = (req, res) => {
-  
-  const name = req.query.name;
-
-  var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
-
-  Restaurant.find(condition_name)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
-      });
-    });
-};
 
 // Find Restaurant by cuisine
 exports.findByCuisine = (req, res) => {
@@ -118,14 +100,14 @@ exports.findByCuisine = (req, res) => {
 
 // Find Restaurant by name & cuisine
 exports.findByNameAndCuisine = (req, res) => {
-  
+
   const name = req.query.name;
   const cuisine = req.query.cuisine;
 
   var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
   var condition_cuisine = cuisine ? { cuisine: { $regex: new RegExp(cuisine), $options: "i" } } : {};
 
-  Restaurant.find({$or:[condition_name,condition_cuisine]})
+  Restaurant.find({ $or: [condition_name, condition_cuisine] })
     .then(data => {
       res.send(data);
     })
@@ -201,33 +183,32 @@ exports.deleteAll = (req, res) => {
     });
 };
 
-// Find all checked Restaurants
-exports.findAllChecked = (req, res) => {
-  Restaurant.find({ checked: true })
+// Find restaurants near a specific location
+exports.findNearbyRestaurants = (req, res) => {
+  const { latitude, longitude, maxDistance } = req.query;
+
+  // Parse the coordinates and the maximum distance from the request
+  const lat = parseFloat(latitude);
+  const lon = parseFloat(longitude);
+  const distance = parseInt(maxDistance);
+
+  // Constructs the geospatial search query
+  Restaurant.aggregate([
+    {
+      $geoNear: {
+        near: { type: 'Point', coordinates: [lon, lat] },
+        distanceField: 'distance',
+        maxDistance: distance * 5000, // Convert distance from kilometers to meters
+        spherical: true,
+      },
+    },
+  ])
     .then(data => {
       res.send(data);
     })
     .catch(err => {
       res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
-      });
-    });
-};
-
-// Find a Restaurants by name
-exports.findByName = (req, res) => {
-  const name = req.query.name;
-  let condition = { "name": { $regex: '.*' + name + '.*' } };
-
-  Restaurant.find(condition)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
+        message: err.message || 'Error occurred while searching nearby restaurants.',
       });
     });
 };
