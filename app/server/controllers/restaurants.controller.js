@@ -1,214 +1,150 @@
 const db = require("../models");
 const Restaurant = db.restaurants;
 
+// Function to handle common error responses
+function handleError(res, err) {
+  res.status(500).send({
+    message: err.message || "Some error occurred.",
+  });
+}
+
 // Create and Save a new Restaurant
-exports.create = (req, res) => {
-  // Validate request
-  if (!req.body.name) {
-    res.status(400).send({ message: "Content can not be empty!" });
-    return;
+exports.create = async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).send({ message: "Content can not be empty!" });
+    }
+
+    const restaurant = new Restaurant(req.body);
+    const data = await restaurant.save();
+
+    res.send(data);
+  } catch (err) {
+    handleError(res, err);
   }
-
-  const restaurant = new Restaurant(req.body);
-
-  // Save Restaurant in the database
-  restaurant
-    .save(restaurant)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the Restaurant."
-      });
-    });
 };
 
 // Retrieve all Restaurants from the database.
-exports.findAll = (req, res) => {
-  const title = req.query.title;
-  var condition = title ? { title: { $regex: new RegExp(title), $options: "i" } } : {};
+exports.findAll = async (req, res) => {
+  try {
+    const title = req.query.title;
+    const condition = title
+      ? { title: { $regex: new RegExp(title), $options: "i" } }
+      : {};
 
-  Restaurant.find(condition)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
-      });
-    });
+    const data = await Restaurant.find(condition);
+    res.send(data);
+  } catch (err) {
+    handleError(res, err);
+  }
 };
 
 // Find a single Restaurant with an id
-exports.findOne = (req, res) => {
-  const id = req.params.id;
+exports.findOne = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = await Restaurant.findById(id);
 
-  Restaurant.findById(id)
-    .then(data => {
-      if (!data)
-        res.status(404).send({ message: "Not found Restaurant with id " + id });
-      else res.send(data);
-    })
-    .catch(err => {
-      res
-        .status(500)
-        .send({ message: "Error retrieving Restaurant with id=" + id });
-    });
+    if (!data) {
+      return res.status(404).send({ message: "Not found Restaurant with id " + id });
+    }
+
+    res.send(data);
+  } catch (err) {
+    handleError(res, err);
+  }
 };
 
 // Find Restaurant by name
-exports.findByName = (req, res) => {
+exports.findByName = async (req, res) => {
+  try {
+    const name = req.query.name;
+    const condition = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
 
-  const name = req.query.name;
-
-  var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
-
-  Restaurant.find(condition_name)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
-      });
-    });
+    const data = await Restaurant.find(condition);
+    res.send(data);
+  } catch (err) {
+    handleError(res, err);
+  }
 };
 
-
 // Find Restaurant by cuisine
-exports.findByCuisine = (req, res) => {
+exports.findByCuisine = async (req, res) => {
+  try {
+    const cuisine = req.query.cuisine;
+    const condition = cuisine
+      ? { cuisine: { $regex: new RegExp(cuisine), $options: "i" } }
+      : {};
 
-  const cuisine = req.query.cuisine;
-
-  var condition_cuisine = cuisine ? { cuisine: { $regex: new RegExp(cuisine), $options: "i" } } : {};
-
-  Restaurant.find(condition_cuisine)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
-      });
-    });
+    const data = await Restaurant.find(condition);
+    res.send(data);
+  } catch (err) {
+    handleError(res, err);
+  }
 };
 
 // Find Restaurant by name & cuisine
-exports.findByNameAndCuisine = (req, res) => {
+exports.findByNameAndCuisine = async (req, res) => {
+  try {
+    const name = req.query.name;
+    const cuisine = req.query.cuisine;
+    const condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
+    const condition_cuisine = cuisine
+      ? { cuisine: { $regex: new RegExp(cuisine), $options: "i" } }
+      : {};
 
-  const name = req.query.name;
-  const cuisine = req.query.cuisine;
-
-  var condition_name = name ? { name: { $regex: new RegExp(name), $options: "i" } } : {};
-  var condition_cuisine = cuisine ? { cuisine: { $regex: new RegExp(cuisine), $options: "i" } } : {};
-
-  Restaurant.find({ $or: [condition_name, condition_cuisine] })
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving restaurants."
-      });
-    });
+    const data = await Restaurant.find({ $or: [condition_name, condition_cuisine] });
+    res.send(data);
+  } catch (err) {
+    handleError(res, err);
+  }
 };
 
 // Update a Restaurant by the id in the request
-exports.update = (req, res) => {
-  if (!req.body) {
-    return res.status(400).send({
-      message: "Data to update can not be empty!"
-    });
+exports.update = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { body } = req;
+
+    if (!body) {
+      return res.status(400).send({ message: "Data to update can not be empty!" });
+    }
+
+    const data = await Restaurant.findByIdAndUpdate(id, body, { useFindAndModify: false });
+
+    if (!data) {
+      return res.status(404).send({ message: `Cannot update Restaurant with id=${id}. Maybe Restaurant was not found!` });
+    }
+
+    res.send({ message: "Restaurant was updated successfully." });
+  } catch (err) {
+    handleError(res, err);
   }
-
-  const id = req.params.id;
-
-  Restaurant.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-    .then(data => {
-      if (!data) {
-        res.status(404).send({
-          message: `Cannot update Restaurant with id=${id}. Maybe Restaurant was not found!`
-        });
-      } else res.send({ message: "Restaurant was updated successfully." });
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating Restaurant with id=" + id
-      });
-    });
 };
 
 // Delete a Restaurant with the specified id in the request
-exports.delete = (req, res) => {
-  const id = req.params.id;
+exports.delete = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = await Restaurant.findByIdAndRemove(id, { useFindAndModify: false });
 
-  Restaurant.findByIdAndRemove(id, { useFindAndModify: false })
-    .then(data => {
-      if (!data) {
-        res.status(404).send({
-          message: `Cannot delete Restaurant with id=${id}. Maybe Restaurant was not found!`
-        });
-      } else {
-        res.send({
-          message: "Restaurant was deleted successfully!"
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Could not delete Restaurant with id=" + id
-      });
-    });
+    if (!data) {
+      return res.status(404).send({ message: `Cannot delete Restaurant with id=${id}. Maybe Restaurant was not found!` });
+    }
+
+    res.send({ message: "Restaurant was deleted successfully!" });
+  } catch (err) {
+    handleError(res, err);
+  }
 };
 
 // Delete all Restaurants from the database.
-exports.deleteAll = (req, res) => {
-  Restaurant.deleteMany({})
-    .then(data => {
-      res.send({
-        message: `${data.deletedCount} Restaurants were deleted successfully!`
-      });
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while removing all restaurants."
-      });
-    });
-};
-
-// Find restaurants near a specific location
-exports.findNearbyRestaurants = (req, res) => {
-  const { latitude, longitude, maxDistance } = req.query;
-
-  // Parse the coordinates and the maximum distance from the request
-  const lat = parseFloat(latitude);
-  const lon = parseFloat(longitude);
-  const distance = parseInt(maxDistance);
-
-  // Constructs the geospatial search query
-  Restaurant.aggregate([
-    {
-      $geoNear: {
-        near: { type: 'Point', coordinates: [lon, lat] },
-        distanceField: 'distance',
-        maxDistance: distance * 5000, // Convert distance from kilometers to meters
-        spherical: true,
-      },
-    },
-  ])
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: err.message || 'Error occurred while searching nearby restaurants.',
-      });
-    });
+exports.deleteAll = async (req, res) => {
+  try {
+    const data = await Restaurant.deleteMany({});
+    res.send({ message: `${data.deletedCount} Restaurants were deleted successfully!` });
+  } catch (err) {
+    handleError(res, err);
+  }
 };
